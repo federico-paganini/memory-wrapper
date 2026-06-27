@@ -10,6 +10,20 @@ without the user ever touching DOSBox or a real printer.
 
 ---
 
+## Scope & audience
+
+This wrapper is purpose-built for the **Memory** DOS accounting suite (*Memory
+Computación*) — specifically its **Contabilidad Central** module (`contab.exe`), an old
+Turbo Pascal program. It is **not** a general-purpose DOS-to-PDF tool: the ESC/P parsing
+and the expected data layout are tailored to that program.
+
+It targets organizations still running this legacy accounting system on modern Windows
+that need to turn its printed reports into PDFs — preview and archive — without a real
+printer or ever touching DOSBox. It is distributed as a single Windows installer that
+bundles everything (the wrapper, DOSBox-X, the DOS program and its data).
+
+---
+
 ## How it works
 
 ```
@@ -111,22 +125,34 @@ poetry run pytest               # run the test suite
 
 ---
 
-## Build & installer
+## Build & installer (Windows)
+
+The deliverable the client installs is built in two steps, both on Windows.
+
+**Prerequisites**
+- [Inno Setup](https://jrsoftware.org/isinfo.php) installed.
+- **DOSBox-X** present at `C:\DOSBox-X` (the installer bundles it from there).
+- The DOS program **and its current data** under `legacy/program/` (not included in this
+  repo). The program reads each company from `\CONT\<company>\` relative to the mounted
+  drive, so the live data must sit under `legacy/program/CONT/`.
 
 **1. Build the executable** (PyInstaller):
 
 ```bash
-poetry run pyinstaller MemoryWrapper.spec
+poetry install
+poetry run pyinstaller MemoryWrapper.spec     # → dist/MemoryWrapper.exe
 ```
 
-Produces `dist/MemoryWrapper.exe`.
+**2. Build the installer** (Inno Setup):
 
-**2. Build the installer** (Inno Setup, on Windows):
+Open `installer/setup.iss` in the Inno Setup Compiler and build it (or run `ISCC.exe`
+on it). It bundles `MemoryWrapper.exe`, `assets/`, the DOS program + data under
+`legacy/program/`, the DOSBox-X config, and DOSBox-X itself.
+Output: `installer/Output/MemoryWrapper_Installer.exe`, which installs to `C:\MemoryWrapper`.
 
-Compile `installer/setup.iss`. It bundles `MemoryWrapper.exe`, the `assets`, the DOS
-program under `legacy/program`, the DOSBox-X configuration, and a copy of DOSBox-X taken
-from `C:\DOSBox-X`. Output: `installer/Output/MemoryWrapper_Installer.exe`, installing to
-`C:\MemoryWrapper`.
+> ⚠️ The installer bundles `legacy/program/` (including the accounting data) and
+> overwrites it on install. Correct for a **first install**; before shipping an update,
+> exclude the live data so a reinstall does not wipe the client's entries.
 
 ---
 
