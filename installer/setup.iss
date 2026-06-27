@@ -1,7 +1,7 @@
 [Setup]
 AppId={{CD4F44C8-F6DF-4D80-85FC-0D8D0092428C}
 AppName=Memory Contab
-AppVersion=1.0.0
+AppVersion=1.1.0
 AppPublisher=Federico Paganini
 DefaultDirName=C:\MemoryWrapper
 DefaultGroupName=MemoryWrapper
