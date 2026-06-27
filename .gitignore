@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# PyInstaller build artifacts
+build/
+dist/
+
+# Inno Setup output (the setup.iss config file IS tracked)
+installer/Output/
+
+# Real client accounting data + the legacy DOS program — never publish
+legacy/program/
+
+# Local Claude project instructions — not part of the published repo
+CLAUDE.md
+
+# OS cruft
+.DS_Store
+Thumbs.db

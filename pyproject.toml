@@ -1,0 +1,31 @@
+[project]
+name = "memory-wrapper"
+version = "0.1.0"
+description = "Legacy DOS accounting program wrapper"
+authors = [
+    {name = "Federico Paganini"}
+]
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "watchdog (>=6.0.0,<7.0.0)",
+    "pyqt6 (>=6.11.0,<7.0.0)",
+    "fpdf2 (>=2.8.7,<3.0.0)",
+    "pymupdf (>=1.27.2.2,<2.0.0.0)",
+    "pillow (>=12.2.0,<13.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pyinstaller (>=6.20.0,<7.0.0)",
+    "pytest (>=8.0.0,<10.0.0)"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
