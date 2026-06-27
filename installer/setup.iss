@@ -34,8 +34,12 @@ Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubd
 ; DOSBox-X (whole folder — resilient to version changes adding/renaming files)
 Source: "C:\DOSBox-X\*"; DestDir: "{app}\dosbox"; Flags: ignoreversion recursesubdirs
 
-; DOS program + data
-Source: "..\legacy\program\*"; DestDir: "{app}\legacy\program"; Flags: ignoreversion recursesubdirs
+; DOS program + client data — installed ONCE. On reinstall/update we must NOT
+; overwrite it: the client's accounting (CONT\<empresa>, historia.dat, *.DAT)
+; accumulates here. `onlyifdoesntexist` copies only missing files (fresh install,
+; or files added in a later version) and never clobbers existing data. To ship a
+; fix to a program binary, add an explicit `ignoreversion` entry for that file.
+Source: "..\legacy\program\*"; DestDir: "{app}\legacy\program"; Flags: recursesubdirs onlyifdoesntexist
 
 ; DOSBox conf
 Source: "..\legacy\dosbox-x.conf"; DestDir: "{app}\legacy"; Flags: ignoreversion
