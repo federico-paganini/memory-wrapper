@@ -7,6 +7,7 @@ from ..settings import Settings, FontConfig
 from ..logger import get_logger
 from ..report.parser import parse_prn
 from ..report.generator import generate_pdf
+from ..report.naming import report_filename
 from .preview_window import PreviewWindow
 
 logger = get_logger(__name__)
@@ -15,8 +16,8 @@ logger = get_logger(__name__)
 class PdfWorker(QThread):
     """Parses a .PRN and generates its PDF off the UI thread."""
 
-    finished_ok = pyqtSignal(object, Path)  # (window, temp_pdf)
-    failed = pyqtSignal(object, str)         # (window, message)
+    finished_ok = pyqtSignal(object, Path, str)  # (window, temp_pdf, suggested_name)
+    failed = pyqtSignal(object, str)              # (window, message)
 
     def __init__(self, prn_path: Path, window: PreviewWindow, fonts: FontConfig):
         super().__init__()
@@ -31,12 +32,13 @@ class PdfWorker(QThread):
             temp_pdf = Path(temp_name)
             lines = parse_prn(str(self._prn_path))
             generate_pdf(lines, str(temp_pdf), self._fonts)
+            suggested_name = report_filename(lines) or ""
             logger.info("Generated PDF for %s (%d lines) -> %s", self._prn_path, len(lines), temp_pdf)
         except Exception as exc:  # surface the failure in the window
             logger.error("Failed to generate PDF for %s", self._prn_path, exc_info=True)
             self.failed.emit(self._window, str(exc))
             return
-        self.finished_ok.emit(self._window, temp_pdf)
+        self.finished_ok.emit(self._window, temp_pdf, suggested_name)
 
 
 class ReportController:
@@ -79,9 +81,9 @@ class ReportController:
         self._workers.add(worker)
         worker.start()
 
-    def _on_pdf_ready(self, window: PreviewWindow, temp_pdf: Path):
+    def _on_pdf_ready(self, window: PreviewWindow, temp_pdf: Path, suggested_name: str):
         if window in self._windows:
-            window.load_pdf(temp_pdf)
+            window.load_pdf(temp_pdf, suggested_name)
         elif temp_pdf.exists():
             temp_pdf.unlink()  # window closed while generating
 

@@ -15,13 +15,6 @@ from ..logger import get_logger
 
 logger = get_logger(__name__)
 
-MESES = {
-    1: 'Enero', 2: 'Febrero', 3: 'Marzo',
-    4: 'Abril', 5: 'Mayo', 6: 'Junio',
-    7: 'Julio', 8: 'Agosto', 9: 'Septiembre',
-    10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
-}
-
 
 class PreviewWindow(QMainWindow):
     """Report preview window.
@@ -37,6 +30,7 @@ class PreviewWindow(QMainWindow):
         self._icon_file = icon_file
         self._output_base = output_base
         self._temp_pdf_path: Path | None = None
+        self._suggested_name = ""
         self._setup_ui()
         self._show_loading()
 
@@ -107,9 +101,10 @@ class PreviewWindow(QMainWindow):
         )
         self._btn_save.setEnabled(False)
 
-    def load_pdf(self, temp_pdf_path: Path):
+    def load_pdf(self, temp_pdf_path: Path, suggested_name: str = ""):
         """Swap the loading state for the rendered PDF pages."""
         self._temp_pdf_path = temp_pdf_path
+        self._suggested_name = suggested_name
         self._clear_pages()
         self._render_pdf()
         self._btn_save.setEnabled(True)
@@ -140,16 +135,15 @@ class PreviewWindow(QMainWindow):
         if self._temp_pdf_path is None:
             return
 
-        fecha = datetime.now()
-        output_dir = (
-            self._output_base /
-            fecha.strftime('%Y') /
-            MESES[fecha.month]
-        )
+        output_dir = self._output_base
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = f"Reporte {fecha.strftime('%d-%m-%Y')}.pdf"
-        dest = output_dir / filename
+        stem = self._suggested_name or f"memory-contab-{datetime.now().strftime('%d-%m-%Y')}"
+        dest = output_dir / f"{stem}.pdf"
+        counter = 2
+        while dest.exists():  # never overwrite an existing report
+            dest = output_dir / f"{stem} ({counter}).pdf"
+            counter += 1
 
         shutil.copy2(str(self._temp_pdf_path), dest)
         logger.info("Report saved to %s", dest)
