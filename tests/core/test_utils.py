@@ -5,12 +5,12 @@ from pathlib import Path
 from src.core.utils import get_base_path
 
 
-def test_dev_base_path_is_src_parent(monkeypatch):
+def test_dev_base_path_is_repo_root(monkeypatch):
     monkeypatch.setattr(sys, 'frozen', False, raising=False)
     base = get_base_path()
-    # In dev it resolves to the `src` directory (parent of core/utils.py's parent).
-    assert base.name == 'src'
-    assert base.is_dir()
+    # In dev it resolves to the repo root, which holds src/ and pyproject.toml.
+    assert (base / 'src').is_dir()
+    assert (base / 'pyproject.toml').exists()
 
 
 def test_frozen_base_path_is_executable_dir(monkeypatch, tmp_path):
