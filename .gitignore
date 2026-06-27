@@ -21,6 +21,7 @@ legacy/program/
 *.rar
 *.zip
 /memory-*/
+Respaldo*/
 
 # Local Claude project instructions — not part of the published repo
 CLAUDE.md
