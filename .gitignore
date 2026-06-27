@@ -17,6 +17,10 @@ installer/Output/
 
 # Real client accounting data + the legacy DOS program — never publish
 legacy/program/
+# Client data backups / incoming packages (never publish — public repo)
+*.rar
+*.zip
+/memory-*/
 
 # Local Claude project instructions — not part of the published repo
 CLAUDE.md
