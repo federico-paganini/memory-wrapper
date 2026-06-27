@@ -6,13 +6,12 @@ authors = [
     {name = "Federico Paganini"}
 ]
 license = "MIT"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "watchdog (>=6.0.0,<7.0.0)",
     "pyqt6 (>=6.11.0,<7.0.0)",
     "fpdf2 (>=2.8.7,<3.0.0)",
-    "pymupdf (>=1.27.2.2,<2.0.0.0)",
-    "pillow (>=12.2.0,<13.0.0)"
+    "pymupdf (>=1.27.2.2,<2.0.0.0)"
 ]
 
 
