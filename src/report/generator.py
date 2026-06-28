@@ -3,9 +3,10 @@ from fpdf import FPDF
 from report.parser import Line
 from settings import FontConfig
 
-# Report pages render on A4 landscape (matches the wide dot-matrix layout) and
-# paginate automatically when a page fills up; form-feeds force a new page.
-PAGE_ORIENTATION = 'L'
+# Report pages render on A4 portrait and paginate automatically when a page fills
+# up; form-feeds force a new page (deferred so leading/trailing FFs don't yield
+# blank pages).
+PAGE_ORIENTATION = 'P'
 PAGE_FORMAT = 'A4'
 PAGE_MARGIN = 10
 
@@ -33,15 +34,24 @@ def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None
 
     pdf.add_page()
     pdf.set_font('Consolas', style='', size=fonts.size_normal)
+    page_has_content = False
+    pending_break = False
 
     for line in lines:
         if line.page_break:
-            pdf.add_page()
+            pending_break = True  # apply before the next content (skips blank pages)
             continue
 
         if line.is_empty():
-            pdf.ln(4)
+            if not pending_break:  # don't add blank space onto a page we're leaving
+                pdf.ln(4)
             continue
+
+        if pending_break:
+            if page_has_content:
+                pdf.add_page()
+                page_has_content = False
+            pending_break = False
 
         line_height = _get_line_height(line, fonts)
         last_idx = len(line.segments) - 1
@@ -63,5 +73,6 @@ def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None
             )
 
         pdf.ln(line_height)
+        page_has_content = True
 
     pdf.output(output_path)

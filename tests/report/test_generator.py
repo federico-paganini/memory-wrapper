@@ -85,3 +85,52 @@ def test_generates_pdf_for_empty_document(tmp_path, fonts):
     generate_pdf([], str(out), fonts)
     assert out.exists()
     assert out.read_bytes().startswith(b'%PDF')
+
+
+import re  # noqa: E402
+
+
+def _page_count(data: bytes) -> int:
+    return len(re.findall(rb'/Type\s*/Page[^s]', data))
+
+
+def _media_box(data: bytes) -> tuple[float, float]:
+    m = re.search(rb'/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]', data)
+    assert m, "no MediaBox in PDF"
+    return float(m.group(1)), float(m.group(2))
+
+
+@requires_font
+def test_pages_are_a4_portrait(tmp_path, fonts):
+    out = tmp_path / 'p.pdf'
+    generate_pdf([Line(segments=[Segment(text='X')])], str(out), fonts)
+    w, h = _media_box(out.read_bytes())
+    assert w < h  # portrait: width < height
+
+
+@requires_font
+def test_leading_form_feed_does_not_create_blank_page(tmp_path, fonts):
+    lines = [Line(page_break=True), Line(segments=[Segment(text='X')])]
+    out = tmp_path / 'lead.pdf'
+    generate_pdf(lines, str(out), fonts)
+    assert _page_count(out.read_bytes()) == 1
+
+
+@requires_font
+def test_trailing_form_feed_does_not_create_blank_page(tmp_path, fonts):
+    lines = [Line(segments=[Segment(text='X')]), Line(page_break=True)]
+    out = tmp_path / 'trail.pdf'
+    generate_pdf(lines, str(out), fonts)
+    assert _page_count(out.read_bytes()) == 1
+
+
+@requires_font
+def test_mid_form_feed_creates_new_page(tmp_path, fonts):
+    lines = [
+        Line(segments=[Segment(text='A')]),
+        Line(page_break=True),
+        Line(segments=[Segment(text='B')]),
+    ]
+    out = tmp_path / 'mid.pdf'
+    generate_pdf(lines, str(out), fonts)
+    assert _page_count(out.read_bytes()) == 2
