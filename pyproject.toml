@@ -1,6 +1,6 @@
 [project]
 name = "memory-wrapper"
-version = "1.2.0"
+version = "1.2.2"
 description = "Legacy DOS accounting program wrapper"
 authors = [
     {name = "Federico Paganini"}
