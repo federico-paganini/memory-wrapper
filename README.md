@@ -66,8 +66,8 @@ When DOSBox-X is closed, the wrapper shuts down with it.
 
 ```
 src/
-  __init__.py         → create_app(): composition root (builds settings, logging, wiring)
-  main.py             → entry point (python -m src.main)
+  main.py             → entry point (python src/main.py)
+  factory.py          → create_app(): composition root (builds settings, logging, wiring)
   settings.py         → centralized config (paths, fonts/sizes, quiet_period, logging)
   logger.py           → logging setup (rotating file + console)
   core/
@@ -114,7 +114,7 @@ Python dependencies (see `pyproject.toml`): `watchdog`, `pyqt6`, `fpdf2`, `pymup
 
 ```bash
 poetry install
-poetry run python -m src.main   # full run; needs DOSBox-X + the DOS program (see note)
+poetry run python src/main.py   # full run; needs DOSBox-X + the DOS program (see note)
 poetry run pytest               # run the test suite
 ```
 

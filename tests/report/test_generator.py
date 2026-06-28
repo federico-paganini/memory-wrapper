@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from src.settings import FontConfig
-from src.report.parser import Line, Segment
-from src.report.generator import generate_pdf, _get_font_size, _get_line_height
+from settings import FontConfig
+from report.parser import Line, Segment
+from report.generator import generate_pdf, _get_font_size, _get_line_height
 
 
 def _find_ttf() -> Path | None:

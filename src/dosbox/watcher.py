@@ -5,7 +5,7 @@ from collections.abc import Callable
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 
-from ..logger import get_logger
+from logger import get_logger
 
 logger = get_logger(__name__)
 

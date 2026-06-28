@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from src.logger import setup_logging, get_logger
+from logger import setup_logging, get_logger
 
 
 def test_creates_log_file_and_writes(tmp_path):

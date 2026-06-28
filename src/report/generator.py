@@ -1,7 +1,7 @@
 from fpdf import FPDF
 
-from .parser import Line
-from ..settings import FontConfig
+from report.parser import Line
+from settings import FontConfig
 
 # Report pages render on A4 landscape (matches the wide dot-matrix layout) and
 # paginate automatically when a page fills up; form-feeds force a new page.

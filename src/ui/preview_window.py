@@ -10,8 +10,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap, QImage, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from .styles import BTN_SAVE, BTN_CANCEL
-from ..logger import get_logger
+from ui.styles import BTN_SAVE, BTN_CANCEL
+from logger import get_logger
 
 logger = get_logger(__name__)
 

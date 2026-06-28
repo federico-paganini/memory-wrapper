@@ -3,12 +3,12 @@ import tempfile
 from pathlib import Path
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
-from ..settings import Settings, FontConfig
-from ..logger import get_logger
-from ..report.parser import parse_prn
-from ..report.generator import generate_pdf
-from ..report.naming import report_filename
-from .preview_window import PreviewWindow
+from settings import Settings, FontConfig
+from logger import get_logger
+from report.parser import parse_prn
+from report.generator import generate_pdf
+from report.naming import report_filename
+from ui.preview_window import PreviewWindow
 
 logger = get_logger(__name__)
 

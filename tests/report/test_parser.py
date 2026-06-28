@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.report.parser import parse_prn, Line, Segment
+from report.parser import parse_prn, Line, Segment
 
 
 def parse_bytes(tmp_path: Path, data: bytes) -> list[Line]:

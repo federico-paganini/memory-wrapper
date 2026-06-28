@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from src.core.utils import get_base_path
+from core.utils import get_base_path
 
 
 def test_dev_base_path_is_repo_root(monkeypatch):

@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from .core.utils import get_base_path
+from core.utils import get_base_path
 
 
 class SettingsError(Exception):

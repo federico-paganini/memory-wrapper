@@ -1,10 +1,16 @@
-"""Memory Wrapper application package.
+"""Composition root: builds Settings, sets up logging, validates (fail fast),
+launches DOSBox-X and wires the PRN watcher to the report controller."""
+import sys
+import ctypes
+from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtGui import QIcon
 
-``create_app`` is the composition root: it builds Settings, sets up logging,
-fails fast on missing resources, launches DOSBox-X and wires the PRN watcher to
-the report controller. Heavy imports (Qt, ctypes) are deferred inside
-``create_app`` so importing this package (e.g. from tests) stays cheap.
-"""
+from settings import load_settings, SettingsError
+from logger import setup_logging, get_logger
+from core.signals import AppSignals
+from dosbox.launcher import launch_dosbox, DOSBoxMonitor
+from dosbox.watcher import PRNWatcher
+from ui.controller import ReportController
 
 
 class MemoryWrapperApp:
@@ -28,18 +34,6 @@ class MemoryWrapperApp:
 
 
 def create_app() -> MemoryWrapperApp:
-    import sys
-    import ctypes
-    from PyQt6.QtWidgets import QApplication, QMessageBox
-    from PyQt6.QtGui import QIcon
-
-    from .settings import load_settings, SettingsError
-    from .logger import setup_logging, get_logger
-    from .core.signals import AppSignals
-    from .dosbox.launcher import launch_dosbox, DOSBoxMonitor
-    from .dosbox.watcher import PRNWatcher
-    from .ui.controller import ReportController
-
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('memory.wrapper.app')
 
     settings = load_settings()

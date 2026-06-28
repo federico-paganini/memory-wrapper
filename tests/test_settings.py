@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.settings import Settings, FontConfig, SettingsError, load_settings, _env_float
+from settings import Settings, FontConfig, SettingsError, load_settings, _env_float
 
 
 def make_settings(tmp_path: Path, **overrides) -> Settings:

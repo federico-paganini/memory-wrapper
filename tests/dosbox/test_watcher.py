@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from src.dosbox.watcher import PRNHandler
+from dosbox.watcher import PRNHandler
 
 QUIET = 0.25
 

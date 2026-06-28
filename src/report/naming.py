@@ -1,6 +1,6 @@
 import re
 
-from .parser import Line
+from report.parser import Line
 
 # Spanish connector words kept lowercase in title-cased report names.
 _SMALL_WORDS = {'de', 'del', 'la', 'las', 'el', 'los', 'y', 'e', 'en', 'a', 'por', 'con', 'o', 'u'}

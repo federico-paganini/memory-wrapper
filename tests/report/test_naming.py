@@ -1,6 +1,6 @@
 """Tests for deriving an export filename from a report header."""
-from src.report.parser import Line, Segment
-from src.report.naming import report_filename
+from report.parser import Line, Segment
+from report.naming import report_filename
 
 
 def _lines(*texts: str) -> list[Line]:
