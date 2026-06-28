@@ -70,9 +70,7 @@ class ReportController(QObject):
         self._windows.add(window)
         self._pending = window
 
-        window.showNormal()
-        window.raise_()
-        window.activateWindow()
+        window.bring_to_front()
 
     def on_ready(self, prn_path: Path):
         window = self._pending

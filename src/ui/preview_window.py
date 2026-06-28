@@ -1,4 +1,5 @@
 import os
+import ctypes
 import shutil
 import fitz  # pymupdf
 from pathlib import Path
@@ -157,6 +158,46 @@ class PreviewWindow(QMainWindow):
         QMessageBox.information(self, "Listo", f"Reporte guardado en:\n{dest}")
         os.startfile(str(output_dir))
         self.close()
+
+    def bring_to_front(self):
+        """Show the window and force it to the foreground.
+
+        DOSBox-X owns the foreground when a report prints, and Windows' foreground
+        lock blocks a background app's raise_()/activateWindow(). We unlock it the
+        standard Win32 way (AttachThreadInput) so the preview pops in front.
+        """
+        self.setWindowState(
+            (self.windowState() & ~Qt.WindowState.WindowMinimized)
+            | Qt.WindowState.WindowActive
+        )
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+        try:
+            self._force_foreground()
+        except Exception:  # never let a focus quirk break showing the report
+            logger.warning("Could not force the preview window to the foreground", exc_info=True)
+
+    def _force_foreground(self):
+        user32 = ctypes.windll.user32
+        kernel32 = ctypes.windll.kernel32
+        hwnd = int(self.winId())
+        foreground = user32.GetForegroundWindow()
+        if not foreground:
+            user32.SetForegroundWindow(hwnd)
+            return
+        fg_thread = user32.GetWindowThreadProcessId(foreground, None)
+        cur_thread = kernel32.GetCurrentThreadId()
+        if fg_thread and fg_thread != cur_thread:
+            user32.AttachThreadInput(fg_thread, cur_thread, True)
+            try:
+                user32.SetForegroundWindow(hwnd)
+                user32.BringWindowToTop(hwnd)
+            finally:
+                user32.AttachThreadInput(fg_thread, cur_thread, False)
+        else:
+            user32.SetForegroundWindow(hwnd)
+            user32.BringWindowToTop(hwnd)
 
     def closeEvent(self, event):
         # Always remove the temp on close, saved or not.
