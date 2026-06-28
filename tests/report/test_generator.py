@@ -5,7 +5,7 @@ import pytest
 
 from settings import FontConfig
 from report.parser import Line, Segment
-from report.generator import generate_pdf, _get_font_size, _get_line_height
+from report.generator import generate_pdf, _get_font_size
 
 
 def _find_ttf() -> Path | None:
@@ -25,7 +25,7 @@ requires_font = pytest.mark.skipif(_TTF is None, reason="no system .ttf font ava
 def fonts() -> FontConfig:
     return FontConfig(
         regular=_TTF, bold=_TTF,
-        size_normal=12, size_condensed=10, size_wide=18,
+        size_normal=10, size_condensed=8, size_wide=11,
     )
 
 
@@ -39,26 +39,6 @@ def test_get_font_size_by_state(fonts=None):
     assert _get_font_size(Segment(text='a', wide=True), fc) == 18
     # condensed takes precedence over wide
     assert _get_font_size(Segment(text='a', wide=True, condensed=True), fc) == 10
-
-
-def test_line_height_empty_line():
-    fc = FontConfig(regular=Path('x'), bold=Path('x'),
-                    size_normal=12, size_condensed=10, size_wide=18)
-    assert _get_line_height(Line(segments=[]), fc) == 4
-
-
-def test_line_height_uses_max_size_over_two():
-    fc = FontConfig(regular=Path('x'), bold=Path('x'),
-                    size_normal=12, size_condensed=10, size_wide=18)
-    line = Line(segments=[Segment(text='a'), Segment(text='B', wide=True)])
-    assert _get_line_height(line, fc) == 9  # max(12, 18) // 2
-
-
-def test_line_height_ignores_empty_text_segments():
-    fc = FontConfig(regular=Path('x'), bold=Path('x'),
-                    size_normal=12, size_condensed=10, size_wide=18)
-    # the only segment has empty text -> no sizes -> fallback 4
-    assert _get_line_height(Line(segments=[Segment(text='', wide=True)]), fc) == 4
 
 
 # --- full PDF generation (needs a font) ----------------------------------------
@@ -134,3 +114,13 @@ def test_mid_form_feed_creates_new_page(tmp_path, fonts):
     out = tmp_path / 'mid.pdf'
     generate_pdf(lines, str(out), fonts)
     assert _page_count(out.read_bytes()) == 2
+
+
+@requires_font
+def test_full_prn_page_fits_one_a4_page(tmp_path, fonts):
+    # A typical PRN page (~64 lines) must fit on a single A4 page so the report's
+    # own pagination stays aligned with the PDF's.
+    lines = [Line(segments=[Segment(text=f'row {i}')]) for i in range(64)]
+    out = tmp_path / 'page.pdf'
+    generate_pdf(lines, str(out), fonts)
+    assert _page_count(out.read_bytes()) == 1

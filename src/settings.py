@@ -86,9 +86,9 @@ def load_settings() -> Settings:
         fonts=FontConfig(
             regular=Path('C:/Windows/Fonts/consola.ttf'),
             bold=Path('C:/Windows/Fonts/consolab.ttf'),
-            size_normal=12,
-            size_condensed=10,
-            size_wide=18,
+            size_normal=10,
+            size_condensed=8,
+            size_wide=11,
         ),
         quiet_period=_env_float('MEMORY_WRAPPER_QUIET_PERIOD', 1.5),
         log_dir=log_root / 'MemoryWrapper' / 'logs',

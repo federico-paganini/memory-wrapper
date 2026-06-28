@@ -3,12 +3,15 @@ from fpdf import FPDF
 from report.parser import Line
 from settings import FontConfig
 
-# Report pages render on A4 portrait and paginate automatically when a page fills
-# up; form-feeds force a new page (deferred so leading/trailing FFs don't yield
-# blank pages).
+# A4 portrait, auto page-break as a safety net, form-feeds force a new page
+# (deferred so leading/trailing FFs don't yield blank pages).
 PAGE_ORIENTATION = 'P'
 PAGE_FORMAT = 'A4'
 PAGE_MARGIN = 10
+# Printer page length. The line pitch is sized from this so one PRN page (~66
+# printer lines, header repeated per page) fits one A4 page — keeping the report's
+# own pagination aligned with the PDF's.
+LINES_PER_PAGE = 66
 
 
 def _get_font_size(segment, fonts: FontConfig) -> int:
@@ -19,11 +22,6 @@ def _get_font_size(segment, fonts: FontConfig) -> int:
     return fonts.size_normal
 
 
-def _get_line_height(line: Line, fonts: FontConfig) -> int:
-    sizes = [_get_font_size(s, fonts) for s in line.segments if s.text]
-    return max(sizes) // 2 if sizes else 4
-
-
 def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None:
     pdf = FPDF(orientation=PAGE_ORIENTATION, unit='mm', format=PAGE_FORMAT)
     pdf.set_margins(PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN)
@@ -31,6 +29,10 @@ def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None
 
     pdf.add_font('Consolas', style='', fname=str(fonts.regular))
     pdf.add_font('Consolas', style='B', fname=str(fonts.bold))
+
+    # Fixed line pitch: every line advances the same (like the printer's 6 lpi),
+    # and a full PRN page fits one A4 page.
+    line_height = (pdf.h - 2 * PAGE_MARGIN) / LINES_PER_PAGE
 
     pdf.add_page()
     pdf.set_font('Consolas', style='', size=fonts.size_normal)
@@ -44,7 +46,7 @@ def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None
 
         if line.is_empty():
             if not pending_break:  # don't add blank space onto a page we're leaving
-                pdf.ln(4)
+                pdf.ln(line_height)
             continue
 
         if pending_break:
@@ -53,9 +55,7 @@ def generate_pdf(lines: list[Line], output_path: str, fonts: FontConfig) -> None
                 page_has_content = False
             pending_break = False
 
-        line_height = _get_line_height(line, fonts)
         last_idx = len(line.segments) - 1
-
         for idx, segment in enumerate(line.segments):
             if not segment.text:
                 continue

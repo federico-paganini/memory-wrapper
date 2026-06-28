@@ -68,7 +68,7 @@ def test_load_settings_defaults(monkeypatch):
     s = load_settings()
     assert s.quiet_period == 1.5
     assert s.log_level == 'INFO'
-    assert s.fonts.size_normal == 12
+    assert s.fonts.size_normal == 10
 
 
 def test_load_settings_env_overrides(monkeypatch):
