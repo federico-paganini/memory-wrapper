@@ -106,7 +106,12 @@ class PreviewWindow(QMainWindow):
         self._temp_pdf_path = temp_pdf_path
         self._suggested_name = suggested_name
         self._clear_pages()
-        self._render_pdf()
+        try:
+            self._render_pdf()
+        except Exception as exc:  # fail loud like the rest of the pipeline
+            logger.error("Failed to render PDF %s", temp_pdf_path, exc_info=True)
+            self.show_error(str(exc))
+            return
         self._btn_save.setEnabled(True)
 
     def show_error(self, message: str):
@@ -118,18 +123,20 @@ class PreviewWindow(QMainWindow):
 
     def _render_pdf(self):
         doc = fitz.open(str(self._temp_pdf_path))
-        for page in doc:
-            mat = fitz.Matrix(2.0, 2.0)  # 2x zoom for crisp rendering
-            pix = page.get_pixmap(matrix=mat)
-            img = QImage(
-                pix.samples, pix.width, pix.height, pix.stride,
-                QImage.Format.Format_RGB888
-            )
-            label = QLabel()
-            label.setPixmap(QPixmap.fromImage(img))
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self._pages_layout.addWidget(label)
-        doc.close()
+        try:
+            for page in doc:
+                mat = fitz.Matrix(2.0, 2.0)  # 2x zoom for crisp rendering
+                pix = page.get_pixmap(matrix=mat)
+                img = QImage(
+                    pix.samples, pix.width, pix.height, pix.stride,
+                    QImage.Format.Format_RGB888
+                )
+                label = QLabel()
+                label.setPixmap(QPixmap.fromImage(img))
+                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                self._pages_layout.addWidget(label)
+        finally:
+            doc.close()
 
     def _on_save(self):
         if self._temp_pdf_path is None:

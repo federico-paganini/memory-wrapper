@@ -55,3 +55,14 @@ def test_unparseable_period_returns_none():
 def test_too_few_lines_returns_none():
     assert report_filename(_lines("BALANCE   X")) is None
     assert report_filename([]) is None
+
+
+def test_illegal_chars_are_sanitized():
+    name = report_filename(_lines('BAL/AN:CE*?   X', 'al 01/01/25'))
+    assert name is not None
+    assert not any(c in name for c in '\\/:*?"<>|')
+
+
+def test_two_digit_year_pivot_boundary():
+    assert report_filename(_lines('X   Y', 'al 01/01/69')) == 'X al 01-01-2069'
+    assert report_filename(_lines('X   Y', 'al 01/01/70')) == 'X al 01-01-1970'

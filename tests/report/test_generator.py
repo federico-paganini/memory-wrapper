@@ -47,6 +47,20 @@ def test_line_height_empty_line():
     assert _get_line_height(Line(segments=[]), fc) == 4
 
 
+def test_line_height_uses_max_size_over_two():
+    fc = FontConfig(regular=Path('x'), bold=Path('x'),
+                    size_normal=12, size_condensed=10, size_wide=18)
+    line = Line(segments=[Segment(text='a'), Segment(text='B', wide=True)])
+    assert _get_line_height(line, fc) == 9  # max(12, 18) // 2
+
+
+def test_line_height_ignores_empty_text_segments():
+    fc = FontConfig(regular=Path('x'), bold=Path('x'),
+                    size_normal=12, size_condensed=10, size_wide=18)
+    # the only segment has empty text -> no sizes -> fallback 4
+    assert _get_line_height(Line(segments=[Segment(text='', wide=True)]), fc) == 4
+
+
 # --- full PDF generation (needs a font) ----------------------------------------
 
 @requires_font

@@ -31,7 +31,6 @@ class Settings:
 
     base_dir: Path
     program_dir: Path
-    assets_dir: Path
     icon_file: Path
     dosbox_exe: Path
     dosbox_conf: Path
@@ -81,7 +80,6 @@ def load_settings() -> Settings:
     return Settings(
         base_dir=base,
         program_dir=base / 'legacy' / 'program',
-        assets_dir=base / 'assets',
         icon_file=base / 'assets' / 'Icon.png',
         dosbox_exe=base / 'dosbox' / 'dosbox-x.exe',
         dosbox_conf=base / 'legacy' / 'dosbox-x.conf',

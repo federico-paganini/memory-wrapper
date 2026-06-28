@@ -16,7 +16,6 @@ def make_settings(tmp_path: Path, **overrides) -> Settings:
     base = dict(
         base_dir=tmp_path,
         program_dir=program,
-        assets_dir=tmp_path,
         icon_file=tmp_path / 'Icon.png',
         dosbox_exe=tmp_path / 'dosbox.exe',
         dosbox_conf=tmp_path / 'dosbox-x.conf',

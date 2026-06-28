@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
 
 from ..settings import Settings, FontConfig
 from ..logger import get_logger
@@ -26,31 +26,38 @@ class PdfWorker(QThread):
         self._fonts = fonts
 
     def run(self):
+        fd, temp_name = tempfile.mkstemp(suffix='.pdf')
+        os.close(fd)
+        temp_pdf = Path(temp_name)
         try:
-            fd, temp_name = tempfile.mkstemp(suffix='.pdf')
-            os.close(fd)
-            temp_pdf = Path(temp_name)
             lines = parse_prn(str(self._prn_path))
             generate_pdf(lines, str(temp_pdf), self._fonts)
             suggested_name = report_filename(lines) or ""
-            logger.info("Generated PDF for %s (%d lines) -> %s", self._prn_path, len(lines), temp_pdf)
         except Exception as exc:  # surface the failure in the window
             logger.error("Failed to generate PDF for %s", self._prn_path, exc_info=True)
+            temp_pdf.unlink(missing_ok=True)  # don't leak the temp on failure
             self.failed.emit(self._window, str(exc))
             return
+        logger.info("Generated PDF for %s (%d lines) -> %s", self._prn_path, len(lines), temp_pdf)
         self.finished_ok.emit(self._window, temp_pdf, suggested_name)
 
 
-class ReportController:
+class ReportController(QObject):
     """Owns the report windows: one new window per printed report.
 
     ``on_started`` opens a loading window as soon as the DOS program starts
     printing; ``on_ready`` generates the PDF and loads it into that window.
     Bursts are strictly sequential, so the window opened by the last
     ``on_started`` is the one the next ``on_ready`` fills.
+
+    Inherits QObject (constructed on the main thread) so that signals emitted
+    from the watcher/Timer threads are delivered to its slots via a queued
+    connection — i.e. ``on_started``/``on_ready`` run on the GUI thread, where
+    creating widgets is safe.
     """
 
     def __init__(self, settings: Settings):
+        super().__init__()
         self._settings = settings
         self._windows: set[PreviewWindow] = set()
         self._workers: set[PdfWorker] = set()

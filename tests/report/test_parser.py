@@ -34,9 +34,27 @@ def test_cr_is_ignored(tmp_path):
     assert lines[0].plain_text() == 'AB'
 
 
-def test_form_feed_is_ignored(tmp_path):
+def test_form_feed_marks_page_break(tmp_path):
     lines = parse_bytes(tmp_path, b'A\x0cB\n')
-    assert len(lines) == 1
+    # FF flushes "A", inserts a page break, then "B" continues on a new page.
+    assert [l.plain_text() for l in lines if not l.page_break] == ['A', 'B']
+    assert any(l.page_break for l in lines)
+
+
+def test_truncated_esc_w_at_eof_does_not_crash(tmp_path):
+    # ESC W with no parameter byte at end of buffer must not raise IndexError.
+    lines = parse_bytes(tmp_path, b'AB\x1bW')
+    assert lines[0].plain_text() == 'AB'
+
+
+def test_leading_and_trailing_blank_lines_collapse(tmp_path):
+    lines = parse_bytes(tmp_path, b'\n\n\nA\n\n\n')
+    assert [l.plain_text() for l in lines] == ['', 'A', '']
+
+
+def test_eof_after_style_toggle_flushes_pending(tmp_path):
+    # Pending segments with no trailing newline still flush at EOF.
+    lines = parse_bytes(tmp_path, b'AB\x1bE')
     assert lines[0].plain_text() == 'AB'
 
 
